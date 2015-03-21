@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登陆控制</title>
+
+    <!-- Bootstrap -->
+    <link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="http://cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">登陆控制
+          </a>
+        </div>
+        {% if user is None %}
+          <div class="navbar-right">
+            <p class="navbar-text">现在登陆</p>
+            <a href="/login"><button type="button" class="btn btn-primary  navbar-btn">Sign in</button></a>
+          </div>
+        {% else %}
+          <div class="navbar-right">
+            <p class="navbar-text">欢迎你<code>{{ user }}</code></p>
+          </div>
+        {% end %}
+      </div>
+    </nav>
+
+    <div class="container-fluid" >
+      <div class="row" id="info">
+        <div class="col-xs-12 col-sm-4" >
+        </div>
+        <div class="col-xs-12 col-sm-2" >
+            <img src="{{ static_url('images/t.jpg') }}" class="img-circle"
+                    style="width: 140px; height: 140px;padding-top:10px;">
+        </div>
+        <div class="col-xs-12 col-sm-3" >
+          <center><code><h2>{{ user }}</h2></code></center>
+          <h2>你有以下需要确认的请求</h2>
+        </div>
+      </div>
+      <hr>
+
+
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{{ static_url('js/bootstrap.min.js' ) }}"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        var ws = new WebSocket("ws://localhost:8001/registerDev");
+        ws.onopen = function() {
+            ws.send("{{ user }}");
+        };
+        ws.onmessage = function (evt) {
+            if(evt.data != "beat"){
+              alert("您有一个新的待确认事件");
+              obj = eval ("(" + evt.data + ")");
+              $("#info").after("<div class=\"row\" id=\"a\"> <div class=\"col-xs-12 col-sm-4\"> "
+              + "</div> <div class=\"col-xs-12 col-sm-4\"> "
+              + "<p >" + obj.rcode + "</p> "
+              + "</div> <div class=\"col-xs-12 col-sm-4\"> "
+              + " <button class=\"btn btn-primary\" "
+              + " onclick =\"sendconfirm(\' " + obj.rcode + "\')\" >"
+              + "确认此登陆</button></div></div><hr>");
+              }
+        };
+      });
+    </script>
+    <script src="{{ static_url('js/confirm.js') }} "></script>
+  </body>
+</html>
